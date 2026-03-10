@@ -55,6 +55,18 @@ export default function AdminParcelDetails() {
   const [parcel, setParcel] = useState<Parcel | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const statusSteps = [
+    'Order Placed',
+    'Packed',
+    'Dispatched',
+    'In Transit',
+    'Arrived at Hub',
+    'Out for Delivery',
+    'Delivered'
+  ];
+
+  const currentStatusIndex = statusSteps.indexOf(parcel?.currentStatus || '');
+
   const handleShare = () => {
     const url = `${window.location.origin}/?id=${parcel?.id}`;
     navigator.clipboard.writeText(url);
@@ -207,6 +219,90 @@ export default function AdminParcelDetails() {
               ))}
             </div>
           </motion.div>
+
+          {/* Live Map Visualization */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100"
+          >
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-50">
+              <div className="flex items-center gap-3">
+                <div className="bg-emerald-100 p-2 rounded-xl">
+                  <MapPin className="w-5 h-5 text-emerald-600" />
+                </div>
+                <h3 className="font-bold text-slate-900">Live Route Tracker</h3>
+              </div>
+              <div className="bg-emerald-50 px-3 py-1 rounded-full text-[10px] font-bold text-emerald-600 uppercase tracking-widest flex items-center gap-2">
+                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                Live Simulation
+              </div>
+            </div>
+
+            <div className="h-64 bg-slate-50 rounded-2xl border border-slate-100 relative overflow-hidden">
+              {/* Map Grid Background */}
+              <div className="absolute inset-0 opacity-20 pointer-events-none">
+                <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+              </div>
+
+              {/* Route Visualization */}
+              <div className="absolute inset-0 flex items-center justify-center p-16">
+                <div className="relative w-full h-1.5 bg-slate-200 rounded-full">
+                  {/* Progress Line */}
+                  <div 
+                    className="absolute top-0 left-0 h-full bg-emerald-500 rounded-full transition-all duration-1000 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                    style={{ width: `${(Math.max(0, currentStatusIndex) / (statusSteps.length - 1)) * 100}%` }}
+                  />
+
+                  {/* Origin Point */}
+                  <div className="absolute -left-3 -top-3 w-7 h-7 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center shadow-sm">
+                    <div className="w-2 h-2 bg-slate-400 rounded-full" />
+                    <div className="absolute -bottom-8 text-[10px] font-bold text-slate-400 uppercase tracking-tighter whitespace-nowrap">
+                      {parcel.senderAddress.split(',')[0]}
+                    </div>
+                  </div>
+
+                  {/* Destination Point */}
+                  <div className="absolute -right-3 -top-3 w-7 h-7 bg-white border-2 border-slate-300 rounded-full flex items-center justify-center shadow-sm">
+                    <div className="w-2 h-2 bg-slate-400 rounded-full" />
+                    <div className="absolute -bottom-8 text-[10px] font-bold text-slate-400 uppercase tracking-tighter whitespace-nowrap">
+                      {parcel.receiverAddress.split(',')[0]}
+                    </div>
+                  </div>
+
+                  {/* Current Position (Truck) */}
+                  <motion.div 
+                    className="absolute -top-10 w-16 h-16 flex flex-col items-center"
+                    style={{ left: `calc(${(Math.max(0, currentStatusIndex) / (statusSteps.length - 1)) * 100}% - 32px)` }}
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut" }}
+                  >
+                    <div className="bg-emerald-500 p-2.5 rounded-2xl shadow-xl shadow-emerald-500/40 border-2 border-white">
+                      <Truck className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="w-0.5 h-3 bg-emerald-500" />
+                    <div className="mt-1 bg-white px-2 py-0.5 rounded-md border border-slate-100 shadow-sm">
+                      <span className="text-[8px] font-black text-emerald-600 uppercase tracking-tighter whitespace-nowrap">
+                        {parcel.currentLocation}
+                      </span>
+                    </div>
+                  </motion.div>
+                </div>
+              </div>
+
+              {/* Map Controls (Visual Only) */}
+              <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+                <div className="w-8 h-8 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 font-bold text-lg cursor-default">+</div>
+                <div className="w-8 h-8 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-center text-slate-400 font-bold text-lg cursor-default">-</div>
+              </div>
+            </div>
+            
+            <p className="mt-6 text-xs text-slate-400 leading-relaxed italic">
+              * This is a simulated real-time route based on the current status and hub location. 
+              GPS coordinates are approximated for security.
+            </p>
+          </motion.div>
         </div>
 
         {/* Sidebar Info */}
@@ -356,16 +452,19 @@ export default function AdminParcelDetails() {
                 </div>
               </div>
             ) : (
-              <div className="py-4 text-center space-y-3">
-                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
-                  <User className="w-6 h-6 text-slate-300" />
+              <div className="py-6 text-center space-y-4">
+                <div className="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto border border-amber-100">
+                  <User className="w-8 h-8 text-amber-500" />
                 </div>
-                <p className="text-sm text-slate-400">No delivery agent assigned to this shipment yet.</p>
+                <div className="space-y-1">
+                  <p className="font-bold text-slate-900">No Agent Assigned</p>
+                  <p className="text-sm text-slate-500">Assign a delivery agent to provide customers with real-time delivery info.</p>
+                </div>
                 <Link 
                   to={`/admin/edit/${parcel.id}`}
-                  className="inline-block text-xs font-bold text-indigo-600 hover:text-indigo-700 uppercase tracking-widest"
+                  className="inline-flex items-center justify-center w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20"
                 >
-                  Assign Agent Now
+                  Assign Agent
                 </Link>
               </div>
             )}
