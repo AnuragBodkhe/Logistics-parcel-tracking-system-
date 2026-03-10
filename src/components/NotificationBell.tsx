@@ -6,7 +6,7 @@ import { AppNotification } from '../types';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
-export const NotificationBell = () => {
+export const NotificationBell = ({ btnClassName = "text-slate-600 hover:text-slate-900 hover:bg-slate-200" }: { btnClassName?: string }) => {
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -51,7 +51,7 @@ export const NotificationBell = () => {
     <div className="relative" ref={dropdownRef}>
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
+        className={`relative p-2 rounded-xl transition-all ${btnClassName}`}
       >
         {unreadCount > 0 ? (
           <>

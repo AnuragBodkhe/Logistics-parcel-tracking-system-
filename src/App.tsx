@@ -64,7 +64,6 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
             </div>
             <h1 className="text-xl font-bold tracking-tight">LogiTrack</h1>
           </Link>
-          {isAdmin && <NotificationBell />}
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -112,7 +111,7 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
           <span className="font-bold text-lg">LogiTrack</span>
         </Link>
         <div className="flex items-center gap-4">
-          {isAdmin && <NotificationBell />}
+          {isAdmin && <NotificationBell btnClassName="text-slate-400 hover:text-white hover:bg-slate-800" />}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X /> : <Menu />}
           </button>
@@ -166,9 +165,14 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 bg-slate-50 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
-          {children}
+      <main className="flex-1 flex flex-col bg-slate-50 overflow-y-auto">
+        <header className="hidden md:flex sticky top-0 z-30 bg-slate-50/80 backdrop-blur-md px-4 md:px-8 py-4 justify-end items-center">
+          {isAdmin && <NotificationBell />}
+        </header>
+        <div className="flex-1 p-4 md:p-8 pt-0 md:pt-0">
+          <div className="max-w-6xl mx-auto">
+            {children}
+          </div>
         </div>
       </main>
 
