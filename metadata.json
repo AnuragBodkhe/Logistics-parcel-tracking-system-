@@ -1,0 +1,5 @@
+{
+  "name": "LogiTrack - Parcel Tracking System",
+  "description": "A comprehensive logistics management and parcel tracking system with local storage persistence, featuring admin dashboards, real-time status updates, and public tracking.",
+  "requestFramePermissions": []
+}
