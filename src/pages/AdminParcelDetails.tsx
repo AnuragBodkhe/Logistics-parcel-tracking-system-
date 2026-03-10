@@ -21,8 +21,9 @@ import {
 } from 'lucide-react';
 import { storageService } from '../services/storage';
 import { Parcel, ParcelStatus } from '../types';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { format, formatDistanceToNow } from 'date-fns';
+import { AdminParcelDetailsSkeleton } from '../components/Skeleton';
 
 const getStatusStyles = (status: ParcelStatus) => {
   switch (status) {
@@ -53,6 +54,7 @@ export default function AdminParcelDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [parcel, setParcel] = useState<Parcel | null>(null);
+  const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   const statusSteps = [
@@ -75,16 +77,22 @@ export default function AdminParcelDetails() {
   };
 
   useEffect(() => {
-    if (id) {
-      const found = storageService.getParcelById(id);
-      if (found) {
-        setParcel(found);
-      } else {
-        navigate('/admin/list');
+    const fetchParcel = async () => {
+      if (id) {
+        setLoading(true);
+        const found = await storageService.getParcelByIdAsync(id);
+        if (found) {
+          setParcel(found);
+        } else {
+          navigate('/admin/list');
+        }
+        setLoading(false);
       }
-    }
+    };
+    fetchParcel();
   }, [id, navigate]);
 
+  if (loading) return <AdminParcelDetailsSkeleton />;
   if (!parcel) return null;
 
   return (

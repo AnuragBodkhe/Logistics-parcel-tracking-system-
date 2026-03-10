@@ -18,12 +18,14 @@ import { storageService } from '../services/storage';
 import { Parcel, ParcelStatus } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 import { format, formatDistanceToNow, isAfter } from 'date-fns';
+import { ParcelCardSkeleton } from '../components/Skeleton';
 
 export default function Tracking() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [trackingId, setTrackingId] = useState(searchParams.get('id') || '');
   const [parcel, setParcel] = useState<Parcel | null>(null);
   const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
@@ -47,16 +49,20 @@ export default function Tracking() {
     }
   }, [searchParams]);
 
-  const handleTrack = (id: string) => {
-    const found = storageService.getParcelById(id);
+  const handleTrack = async (id: string) => {
+    setLoading(true);
+    setParcel(null);
+    setError(false);
+    
+    const found = await storageService.getParcelByIdAsync(id);
+    
     if (found) {
       setParcel(found);
-      setError(false);
       saveRecentSearch(id);
     } else {
-      setParcel(null);
       setError(true);
     }
+    setLoading(false);
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -149,7 +155,17 @@ export default function Tracking() {
 
       {/* Result Section */}
       <AnimatePresence mode="wait">
-        {parcel && (
+        {loading && (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <ParcelCardSkeleton />
+          </motion.div>
+        )}
+        {parcel && !loading && (
           <motion.div
             key={parcel.id}
             initial={{ opacity: 0, y: 40 }}

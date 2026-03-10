@@ -46,3 +46,13 @@ export interface DashboardStats {
   pending: number;
   failed: number;
 }
+
+export interface AppNotification {
+  id: string;
+  parcelId: string;
+  title: string;
+  message: string;
+  timestamp: string;
+  isRead: boolean;
+  type: 'status_change' | 'alert';
+}

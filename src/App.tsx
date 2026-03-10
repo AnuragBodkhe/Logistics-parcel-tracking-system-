@@ -18,9 +18,13 @@ import {
   Menu, 
   X,
   Truck,
-  ShieldCheck
+  ShieldCheck,
+  Bell,
+  Home
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { NotificationBell } from './components/NotificationBell';
+import { NotificationToast } from './components/NotificationToast';
 
 // Pages (to be created)
 import Dashboard from './pages/Dashboard';
@@ -44,6 +48,7 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Add Parcel', path: '/admin/add', icon: PlusCircle },
     { name: 'All Parcels', path: '/admin/list', icon: List },
+    { name: 'Public Tracking', path: '/', icon: Home },
   ] : [
     { name: 'Track Parcel', path: '/', icon: Search },
   ];
@@ -52,11 +57,14 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Sidebar for Desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-slate-900 text-white p-6 sticky top-0 h-screen">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="bg-emerald-500 p-2 rounded-lg">
-            <Truck className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-xl font-bold tracking-tight">LogiTrack</h1>
+        <div className="flex items-center justify-between mb-10">
+          <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="bg-emerald-500 p-2 rounded-lg">
+              <Truck className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-xl font-bold tracking-tight">LogiTrack</h1>
+          </Link>
+          {isAdmin && <NotificationBell />}
         </div>
 
         <nav className="flex-1 space-y-2">
@@ -99,13 +107,16 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
 
       {/* Mobile Header */}
       <header className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
-        <div className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <Truck className="w-6 h-6 text-emerald-500" />
           <span className="font-bold text-lg">LogiTrack</span>
+        </Link>
+        <div className="flex items-center gap-4">
+          {isAdmin && <NotificationBell />}
+          <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            {isMenuOpen ? <X /> : <Menu />}
+          </button>
         </div>
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <X /> : <Menu />}
-        </button>
       </header>
 
       {/* Mobile Menu Overlay */}
@@ -160,6 +171,8 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
           {children}
         </div>
       </main>
+
+      <NotificationToast />
     </div>
   );
 };
