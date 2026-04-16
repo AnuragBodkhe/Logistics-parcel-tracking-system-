@@ -14,47 +14,24 @@ const DeliveryAgentManagement: React.FC = () => {
     const loadAgents = () => {
       try {
         const storedAgents = localStorage.getItem('logitrack_agents');
-        if (storedAgents) {
+        const mockInitialized = localStorage.getItem('logitrack_agents_mock_initialized');
+        
+        if (!storedAgents && !mockInitialized) {
+          // Import mock agents data
+          import('../services/mockData').then(({ mockAgents }) => {
+            setAgents(mockAgents);
+            localStorage.setItem('logitrack_agents', JSON.stringify(mockAgents));
+            localStorage.setItem('logitrack_agents_mock_initialized', 'true');
+            setLoading(false);
+          });
+        } else if (storedAgents) {
           setAgents(JSON.parse(storedAgents));
+          setLoading(false);
         } else {
-          const sampleAgents: DeliveryAgent[] = [
-            {
-              id: '1',
-              name: 'Mike Johnson',
-              phone: '+1234567890',
-              email: 'mike@example.com',
-              vehicle: 'Van',
-              vehicleNumber: 'ABC-123',
-              licenseNumber: 'DL123456',
-              status: 'active',
-              currentLocation: 'Downtown Hub',
-              totalDeliveries: 145,
-              activeDeliveries: 8,
-              rating: 4.8,
-              joinedDate: '2023-01-15'
-            },
-            {
-              id: '2',
-              name: 'Sarah Williams',
-              phone: '+0987654321',
-              email: 'sarah@example.com',
-              vehicle: 'Motorcycle',
-              vehicleNumber: 'XYZ-789',
-              licenseNumber: 'DL789012',
-              status: 'active',
-              currentLocation: 'North District',
-              totalDeliveries: 98,
-              activeDeliveries: 5,
-              rating: 4.9,
-              joinedDate: '2023-03-20'
-            }
-          ];
-          setAgents(sampleAgents);
-          localStorage.setItem('logitrack_agents', JSON.stringify(sampleAgents));
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error loading agents:', error);
-      } finally {
         setLoading(false);
       }
     };

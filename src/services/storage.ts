@@ -1,11 +1,22 @@
 import { Parcel } from '../types';
 import { notificationService } from './notification';
+import { mockParcels } from './mockData';
 
 const STORAGE_KEY = 'logitrack_parcels';
+const MOCK_DATA_KEY = 'logitrack_mock_initialized';
 
 export const storageService = {
   getParcels: (): Parcel[] => {
     const data = localStorage.getItem(STORAGE_KEY);
+    const mockInitialized = localStorage.getItem(MOCK_DATA_KEY);
+    
+    if (!data && !mockInitialized) {
+      // Initialize with mock data on first load
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(mockParcels));
+      localStorage.setItem(MOCK_DATA_KEY, 'true');
+      return mockParcels;
+    }
+    
     return data ? JSON.parse(data) : [];
   },
 
@@ -68,6 +79,8 @@ export const storageService = {
   },
 
   generateTrackingId: (): string => {
-    return `TRK${Date.now()}${Math.floor(Math.random() * 1000)}`;
+    const year = new Date().getFullYear();
+    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+    return `LTRK${year}${random}`;
   }
 };
