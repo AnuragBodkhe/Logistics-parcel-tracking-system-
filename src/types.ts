@@ -56,3 +56,30 @@ export interface AppNotification {
   isRead: boolean;
   type: 'status_change' | 'alert';
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  createdAt: string;
+  totalParcels: number;
+  activeParcels: number;
+}
+
+export interface DeliveryAgent {
+  id: string;
+  name: string;
+  phone: string;
+  email: string;
+  vehicle: string;
+  vehicleNumber: string;
+  licenseNumber: string;
+  status: 'active' | 'inactive' | 'on_leave';
+  currentLocation: string;
+  totalDeliveries: number;
+  activeDeliveries: number;
+  rating: number;
+  joinedDate: string;
+}
