@@ -1,9 +1,6 @@
-@import "tailwindcss";
-
-@theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 @layer base {
   body {
@@ -11,11 +8,13 @@
   }
 }
 
-.glass-panel {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
-}
+@layer components {
+  .glass-panel {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-sm;
+  }
 
-.status-timeline-line {
-  @apply absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200;
+  .status-timeline-line {
+    @apply absolute left-4 top-0 bottom-0 w-0.5 bg-slate-200;
+  }
 }
 
