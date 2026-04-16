@@ -20,19 +20,26 @@ import {
   Truck,
   ShieldCheck,
   Bell,
-  Home
+  Home,
+  Users,
+  BarChart3,
+  Settings as SettingsIcon
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { NotificationBell } from './components/NotificationBell';
 import { NotificationToast } from './components/NotificationToast';
 
-// Pages (to be created)
+// Pages
 import Dashboard from './pages/Dashboard';
 import AddParcel from './pages/AddParcel';
 import ParcelList from './pages/ParcelList';
 import Tracking from './pages/Tracking';
 import Login from './pages/Login';
 import AdminParcelDetails from './pages/AdminParcelDetails';
+import UserManagement from './pages/UserManagement';
+import DeliveryAgentManagement from './pages/DeliveryAgentManagement';
+import Analytics from './pages/Analytics';
+import Settings from './pages/Settings';
 
 const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, isAdmin: boolean, setIsAdmin: (val: boolean) => void }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -48,6 +55,10 @@ const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, 
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Add Parcel', path: '/admin/add', icon: PlusCircle },
     { name: 'All Parcels', path: '/admin/list', icon: List },
+    { name: 'Users', path: '/admin/users', icon: Users },
+    { name: 'Agents', path: '/admin/agents', icon: Truck },
+    { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
+    { name: 'Settings', path: '/admin/settings', icon: SettingsIcon },
     { name: 'Public Tracking', path: '/', icon: Home },
   ] : [
     { name: 'Track Parcel', path: '/', icon: Search },
@@ -217,6 +228,22 @@ export default function App() {
           <Route 
             path="/admin/parcel/:id" 
             element={isAdmin ? <AdminParcelDetails /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/users" 
+            element={isAdmin ? <UserManagement /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/agents" 
+            element={isAdmin ? <DeliveryAgentManagement /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/analytics" 
+            element={isAdmin ? <Analytics /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/settings" 
+            element={isAdmin ? <Settings /> : <Navigate to="/login" />} 
           />
         </Routes>
       </Layout>
