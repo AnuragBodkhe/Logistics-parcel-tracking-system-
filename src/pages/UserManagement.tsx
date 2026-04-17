@@ -11,81 +11,38 @@ const UserManagement: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load users from storage and initialize with mock data
+    // Load users from storage
     const loadUsers = () => {
       try {
         const storedUsers = localStorage.getItem('logitrack_users');
-        const mockInitialized = localStorage.getItem('logitrack_users_mock_initialized');
-        
-        if (!storedUsers && !mockInitialized) {
-          // Initialize with sample data from mock parcels
-          const mockUsers: User[] = [
+        if (storedUsers) {
+          setUsers(JSON.parse(storedUsers));
+        } else {
+          // Initialize with sample data
+          const sampleUsers: User[] = [
             {
               id: '1',
-              name: 'John Anderson',
-              email: 'john.anderson@techcorp.com',
-              phone: '+1-555-0123',
-              address: '123 Tech Park, Silicon Valley, CA 94025',
-              createdAt: '2024-01-15T09:00:00Z',
-              totalParcels: 12,
-              activeParcels: 1
+              name: 'John Doe',
+              email: 'john@example.com',
+              phone: '+1234567890',
+              address: '123 Main St, New York, NY 10001',
+              createdAt: new Date().toISOString(),
+              totalParcels: 15,
+              activeParcels: 3
             },
             {
               id: '2',
-              name: 'Emily Chen',
-              email: 'emily.chen@fashionboutique.com',
-              phone: '+1-555-0234',
-              address: '789 Fashion Avenue, Los Angeles, CA 90001',
-              createdAt: '2024-01-10T10:00:00Z',
+              name: 'Jane Smith',
+              email: 'jane@example.com',
+              phone: '+0987654321',
+              address: '456 Oak Ave, Los Angeles, CA 90001',
+              createdAt: new Date().toISOString(),
               totalParcels: 8,
-              activeParcels: 0
-            },
-            {
-              id: '3',
-              name: 'Robert Williams',
-              email: 'robert.williams@lawfirm.com',
-              phone: '+1-555-0345',
-              address: '555 Financial Center, Chicago, IL 60601',
-              createdAt: '2024-01-16T16:00:00Z',
-              totalParcels: 5,
-              activeParcels: 1
-            },
-            {
-              id: '4',
-              name: 'Maria Garcia',
-              email: 'maria.garcia@restaurant.com',
-              phone: '+1-555-0456',
-              address: '777 Food Market, Houston, TX 77001',
-              createdAt: '2024-01-14T08:00:00Z',
-              totalParcels: 3,
-              activeParcels: 1
-            },
-            {
-              id: '5',
-              name: 'Amanda Foster',
-              email: 'amanda.foster@antiques.com',
-              phone: '+1-555-0567',
-              address: '222 Antique Shop, Boston, MA 02101',
-              createdAt: '2024-01-12T11:00:00Z',
-              totalParcels: 7,
-              activeParcels: 1
-            },
-            {
-              id: '6',
-              name: 'Daniel Kim',
-              email: 'daniel.kim@electronics.com',
-              phone: '+1-555-0678',
-              address: '333 Electronics Store, Seattle, WA 98101',
-              createdAt: '2024-01-17T14:00:00Z',
-              totalParcels: 4,
-              activeParcels: 1
+              activeParcels: 2
             }
           ];
-          setUsers(mockUsers);
-          localStorage.setItem('logitrack_users', JSON.stringify(mockUsers));
-          localStorage.setItem('logitrack_users_mock_initialized', 'true');
-        } else if (storedUsers) {
-          setUsers(JSON.parse(storedUsers));
+          setUsers(sampleUsers);
+          localStorage.setItem('logitrack_users', JSON.stringify(sampleUsers));
         }
       } catch (error) {
         console.error('Error loading users:', error);

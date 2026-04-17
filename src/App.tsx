@@ -41,19 +41,27 @@ import DeliveryAgentManagement from './pages/DeliveryAgentManagement';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 
-const Layout = ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children, isAdmin, setIsAdmin }: { children: React.ReactNode, isAdmin: boolean, setIsAdmin: (val: boolean) => void }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-    { name: 'Add Parcel', path: '/add', icon: PlusCircle },
-    { name: 'All Parcels', path: '/list', icon: List },
+  const handleLogout = () => {
+    setIsAdmin(false);
+    navigate('/');
+  };
+
+  const navItems = isAdmin ? [
+    { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
+    { name: 'Add Parcel', path: '/admin/add', icon: PlusCircle },
+    { name: 'All Parcels', path: '/admin/list', icon: List },
+    { name: 'Users', path: '/admin/users', icon: Users },
+    { name: 'Agents', path: '/admin/agents', icon: Truck },
+    { name: 'Analytics', path: '/admin/analytics', icon: BarChart3 },
+    { name: 'Settings', path: '/admin/settings', icon: SettingsIcon },
+    { name: 'Public Tracking', path: '/', icon: Home },
+  ] : [
     { name: 'Track Parcel', path: '/', icon: Search },
-    { name: 'Users', path: '/users', icon: Users },
-    { name: 'Agents', path: '/agents', icon: Truck },
-    { name: 'Analytics', path: '/analytics', icon: BarChart3 },
-    { name: 'Settings', path: '/settings', icon: SettingsIcon },
   ];
 
   return (
@@ -87,10 +95,23 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
         </nav>
 
         <div className="pt-6 border-t border-slate-800">
-          <div className="text-center text-slate-400 text-sm">
-            <p>LogiTrack v1.0</p>
-            <p className="text-xs mt-1">© 2024 Logistics System</p>
-          </div>
+          {isAdmin ? (
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-4 py-3 w-full text-left text-slate-400 hover:text-red-400 hover:bg-red-400/10 rounded-xl transition-all"
+            >
+              <LogOut className="w-5 h-5" />
+              <span className="font-medium">Logout</span>
+            </button>
+          ) : (
+            <Link
+              to="/login"
+              className="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-emerald-400 hover:bg-emerald-400/10 rounded-xl transition-all"
+            >
+              <ShieldCheck className="w-5 h-5" />
+              <span className="font-medium">Admin Login</span>
+            </Link>
+          )}
         </div>
       </aside>
 
@@ -101,7 +122,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
           <span className="font-bold text-lg">LogiTrack</span>
         </Link>
         <div className="flex items-center gap-4">
-          <NotificationBell btnClassName="text-slate-400 hover:text-white hover:bg-slate-800" />
+          {isAdmin && <NotificationBell btnClassName="text-slate-400 hover:text-white hover:bg-slate-800" />}
           <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
             {isMenuOpen ? <X /> : <Menu />}
           </button>
@@ -130,10 +151,24 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
                 </Link>
               ))}
               <div className="pt-6 border-t border-slate-800">
-                <div className="text-center text-slate-400 text-sm">
-                  <p>LogiTrack v1.0</p>
-                  <p className="text-xs mt-1">© 2024 Logistics System</p>
-                </div>
+                {isAdmin ? (
+                  <button 
+                    onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                    className="flex items-center gap-4 text-xl text-red-400 py-2"
+                  >
+                    <LogOut className="w-6 h-6" />
+                    Logout
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="flex items-center gap-4 text-xl text-emerald-400 py-2"
+                  >
+                    <ShieldCheck className="w-6 h-6" />
+                    Admin Login
+                  </Link>
+                )}
               </div>
             </nav>
           </motion.div>
@@ -143,7 +178,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
       {/* Main Content */}
       <main className="flex-1 flex flex-col bg-slate-50 overflow-y-auto">
         <header className="hidden md:flex sticky top-0 z-30 bg-slate-50/80 backdrop-blur-md px-4 md:px-8 py-4 justify-end items-center">
-          <NotificationBell />
+          {isAdmin && <NotificationBell />}
         </header>
         <div className="flex-1 p-4 md:p-8 pt-0 md:pt-0">
           <div className="max-w-6xl mx-auto">
@@ -158,20 +193,58 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 };
 
 export default function App() {
+  const [isAdmin, setIsAdmin] = useState(() => {
+    return localStorage.getItem('logitrack_admin') === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('logitrack_admin', isAdmin.toString());
+  }, [isAdmin]);
+
   return (
     <Router>
-      <Layout>
+      <Layout isAdmin={isAdmin} setIsAdmin={setIsAdmin}>
         <Routes>
           <Route path="/" element={<Tracking />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/add" element={<AddParcel />} />
-          <Route path="/edit/:id" element={<AddParcel />} />
-          <Route path="/list" element={<ParcelList />} />
-          <Route path="/parcel/:id" element={<AdminParcelDetails />} />
-          <Route path="/users" element={<UserManagement />} />
-          <Route path="/agents" element={<DeliveryAgentManagement />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/login" element={<Login setIsAdmin={setIsAdmin} />} />
+          
+          {/* Admin Routes */}
+          <Route 
+            path="/admin" 
+            element={isAdmin ? <Dashboard /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/add" 
+            element={isAdmin ? <AddParcel /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/edit/:id" 
+            element={isAdmin ? <AddParcel /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/list" 
+            element={isAdmin ? <ParcelList /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/parcel/:id" 
+            element={isAdmin ? <AdminParcelDetails /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/users" 
+            element={isAdmin ? <UserManagement /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/agents" 
+            element={isAdmin ? <DeliveryAgentManagement /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/analytics" 
+            element={isAdmin ? <Analytics /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/admin/settings" 
+            element={isAdmin ? <Settings /> : <Navigate to="/login" />} 
+          />
         </Routes>
       </Layout>
     </Router>

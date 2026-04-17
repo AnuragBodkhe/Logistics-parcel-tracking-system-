@@ -10,7 +10,7 @@ export type ParcelStatus =
   | 'Failed Delivery' 
   | 'Returned';
 
-export type DeliveryType = 'Standard' | 'Express' | 'Overnight';
+export type DeliveryType = 'Standard' | 'Express';
 
 export interface StatusUpdate {
   status: ParcelStatus;
@@ -23,40 +23,19 @@ export interface Parcel {
   id: string; // Tracking ID
   senderName: string;
   senderAddress: string;
-  senderPhone: string;
-  senderEmail: string;
   receiverName: string;
   receiverAddress: string;
-  receiverPhone: string;
-  receiverEmail: string;
   weight: string;
-  dimensions: {
-    length: string;
-    width: string;
-    height: string;
-  };
   deliveryType: DeliveryType;
   currentStatus: ParcelStatus;
   currentLocation: string;
   createdDate: string;
   expectedDelivery: string;
-  actualDelivery?: string;
-  price: number;
-  insurance: boolean;
-  insuranceAmount?: number;
-  specialInstructions?: string;
-  category: 'Electronics' | 'Documents' | 'Clothing' | 'Food' | 'Fragile' | 'Other';
-  priority: 'Standard' | 'Express' | 'Overnight';
-  paymentMethod: 'COD' | 'Prepaid' | 'Credit Card';
-  trackingUrl: string;
   history: StatusUpdate[];
   assignedAgent?: {
-    id: string;
     name: string;
     contact: string;
     vehicle: string;
-    vehicleNumber: string;
-    rating: number;
   };
 }
 
