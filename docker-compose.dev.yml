@@ -1,0 +1,202 @@
+# LogiTrack - Development Docker Compose Configuration
+# Optimized for development with hot reload and debugging
+
+version: '3.8'
+
+services:
+  # Frontend Development Server
+  logitrack-dev:
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+    container_name: logitrack-dev
+    ports:
+      - "5173:5173"
+      - "3000:3000"  # Vite dev server port
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:3000
+      - VITE_GEMINI_API_KEY=${VITE_GEMINI_API_KEY}
+    volumes:
+      - .:/app
+      - /app/node_modules  # Prevent node_modules from being overwritten
+      - /app/dist
+    networks:
+      - logitrack-dev-network
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    command: npm run dev
+
+  # Backend Development Server (if needed)
+  logitrack-api-dev:
+    build:
+      context: .
+      dockerfile: docker/api-dev.Dockerfile
+    container_name: logitrack-api-dev
+    ports:
+      - "4000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=sqlite:./data/logitrack-dev.db
+      - JWT_SECRET=dev-secret-key
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+      - ./logs:/app/logs
+    networks:
+      - logitrack-dev-network
+    restart: unless-stopped
+    command: npm run dev:api
+
+  # Development Database
+  postgres-dev:
+    image: postgres:15-alpine
+    container_name: logitrack-postgres-dev
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=logitrack_dev
+      - POSTGRES_USER=logitrack_dev
+      - POSTGRES_PASSWORD=dev123
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./docker/init-dev-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - logitrack-dev-network
+    restart: unless-stopped
+
+  # Redis Development
+  redis-dev:
+    image: redis:7-alpine
+    container_name: logitrack-redis-dev
+    ports:
+      - "6380:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_dev_data:/data
+    networks:
+      - logitrack-dev-network
+    restart: unless-stopped
+
+  # Test Database (for automated testing)
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: logitrack-postgres-test
+    ports:
+      - "5434:5432"
+    environment:
+      - POSTGRES_DB=logitrack_test
+      - POSTGRES_USER=logitrack_test
+      - POSTGRES_PASSWORD=test123
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - logitrack-dev-network
+    profiles:
+      - test
+
+  # Selenium Grid for Testing
+  selenium-hub:
+    image: selenium/hub:4.11.0
+    container_name: logitrack-selenium-hub
+    ports:
+      - "4444:4444"
+    environment:
+      - GRID_MAX_SESSION=16
+      - GRID_BROWSER_TIMEOUT=300
+      - GRID_TIMEOUT=300
+    networks:
+      - logitrack-dev-network
+    profiles:
+      - test
+
+  # Chrome Node for Selenium
+  selenium-chrome:
+    image: selenium/node-chrome:4.11.0
+    container_name: logitrack-selenium-chrome
+    ports:
+      - "5900:5900"  # VNC port
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - NODE_MAX_INSTANCES=4
+      - NODE_MAX_SESSION=4
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1080
+    volumes:
+      - /dev/shm:/dev/shm
+    networks:
+      - logitrack-dev-network
+    depends_on:
+      - selenium-hub
+    profiles:
+      - test
+
+  # Firefox Node for Selenium
+  selenium-firefox:
+    image: selenium/node-firefox:4.11.0
+    container_name: logitrack-selenium-firefox
+    ports:
+      - "5901:5900"  # VNC port
+    environment:
+      - HUB_HOST=selenium-hub
+      - HUB_PORT=4444
+      - NODE_MAX_INSTANCES=4
+      - NODE_MAX_SESSION=4
+      - SCREEN_WIDTH=1920
+      - SCREEN_HEIGHT=1080
+    volumes:
+      - /dev/shm:/dev/shm
+    networks:
+      - logitrack-dev-network
+    depends_on:
+      - selenium-hub
+    profiles:
+      - test
+
+  # MailHog for Email Testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: logitrack-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    networks:
+      - logitrack-dev-network
+    restart: unless-stopped
+
+  # MinIO for S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    container_name: logitrack-minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"  # Console
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - logitrack-dev-network
+    restart: unless-stopped
+
+# Networks
+networks:
+  logitrack-dev-network:
+    driver: bridge
+
+# Volumes
+volumes:
+  postgres_dev_data:
+    driver: local
+  postgres_test_data:
+    driver: local
+  redis_dev_data:
+    driver: local
+  minio_data:
+    driver: local
