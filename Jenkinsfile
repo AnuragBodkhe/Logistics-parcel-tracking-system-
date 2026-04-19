@@ -16,15 +16,15 @@ pipeline {
 
         stage('Install') {
             steps {
-                bat 'node -v'
-                bat 'npm -v'
-                bat 'npm install'
+                sh 'node -v'
+                sh 'npm -v'
+                sh 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                bat 'npm run build'
+                sh 'npm run build'
             }
         }
 
@@ -32,9 +32,9 @@ pipeline {
             steps {
                 script {
                     try {
-                        bat 'npm test'
+                        sh 'npm test'
                     } catch (Exception e) {
-                        echo 'Skipping tests (not defined)'
+                        echo 'Skipping tests'
                     }
                 }
             }
@@ -42,20 +42,20 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                bat "docker build -t %IMAGE_NAME% ."
+                sh 'docker build -t $IMAGE_NAME .'
             }
         }
 
         stage('Run Container') {
             steps {
-                bat "docker rm -f %CONTAINER_NAME% || exit 0"
-                bat "docker run -d -p 3005:3000 --name %CONTAINER_NAME% %IMAGE_NAME%"
+                sh 'docker rm -f $CONTAINER_NAME || true'
+                sh 'docker run -d -p 3005:3000 --name $CONTAINER_NAME $IMAGE_NAME'
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Application running at http://localhost:3005'
+                echo 'App running at http://localhost:3005'
             }
         }
     }
