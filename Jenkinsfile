@@ -3,23 +3,19 @@ pipeline {
 
     environment {
         APP_NAME = "parcel-tracking-app"
-        PORT = "4000"   // external port (changed)
+        PORT = "4000"
     }
 
     stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                url: 'https://github.com/AnuragBodkhe/Logistics-parcel-tracking-system-.git'
-            }
-        }
 
         stage('Build App') {
             steps {
                 sh '''
                 curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
                 apt-get install -y nodejs
+
+                node -v
+                npm -v
 
                 npm install
                 npm run build
@@ -29,7 +25,11 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $APP_NAME .'
+                sh '''
+                docker build -t $APP_NAME .
+                '''
+                // If Dockerfile is inside docker/ folder, use:
+                // docker build -t $APP_NAME -f docker/Dockerfile .
             }
         }
 
