@@ -5,7 +5,18 @@ pipeline {
         nodejs 'NodeJS'
     }
 
+    environment {
+        IMAGE_NAME = "parcel-tracking-app"
+        CONTAINER_NAME = "parcel-container"
+    }
+
     stages {
+
+        stage('Clone') {
+            steps {
+                git url: 'https://github.com/AnuragBodkhe/Logistics-parcel-tracking-system-.git', branch: 'main'
+            }
+        }
 
         stage('Install') {
             steps {
@@ -31,9 +42,22 @@ pipeline {
             }
         }
 
+        stage('Build Docker Image') {
+            steps {
+                bat "docker build -t %IMAGE_NAME% ."
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                bat "docker rm -f %CONTAINER_NAME% || exit 0"
+                bat "docker run -d -p 3000:3000 --name %CONTAINER_NAME% %IMAGE_NAME%"
+            }
+        }
+
         stage('Deploy') {
             steps {
-                echo 'Deploy stage running...'
+                echo 'Application deployed via Docker!'
             }
         }
     }
