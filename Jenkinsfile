@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         APP_NAME = "parcel-tracking-app"
-        PORT = "3000"   // external port
+        PORT = "4000"   // external port (changed)
     }
 
     stages {
@@ -48,7 +48,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ App is running on http://localhost:3000"
+            echo "✅ App is running on http://localhost:4000"
         }
         failure {
             echo "❌ Build failed"
