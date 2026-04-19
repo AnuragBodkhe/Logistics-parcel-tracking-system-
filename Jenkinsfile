@@ -1,29 +1,30 @@
 pipeline {
-    agent {
-        docker {
-            image 'node:18'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
+    agent any
 
     environment {
-        IMAGE_NAME = "parcel-tracking-app"
-        CONTAINER_NAME = "parcel-container"
+        APP_NAME = "parcel-tracking-app"
     }
 
     stages {
 
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/AnuragBodkhe/Logistics-parcel-tracking-system-.git', branch: 'main'
+                git 'https://github.com/AnuragBodkhe/Logistics-parcel-tracking-system-.git'
             }
         }
 
-        stage('Install') {
+        stage('Install Dependencies') {
             steps {
-                sh 'node -v'
-                sh 'npm -v'
-                sh 'npm install'
+                sh '''
+                echo "Installing Node 20..."
+                curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+                apt-get install -y nodejs
+
+                node -v
+                npm -v
+
+                npm install
+                '''
             }
         }
 
@@ -36,32 +37,46 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    try {
-                        sh 'npm test'
-                    } catch (Exception e) {
-                        echo 'Skipping tests'
-                    }
+                    sh '''
+                    if npm run | grep -q "test"; then
+                        npm test
+                    else
+                        echo "No test script found, skipping..."
+                    fi
+                    '''
                 }
             }
         }
 
         stage('Build Docker Image') {
+            when {
+                expression { return sh(script: "which docker || true", returnStatus: true) == 0 }
+            }
             steps {
-                sh 'docker build -t $IMAGE_NAME .'
+                sh 'docker build -t $APP_NAME .'
             }
         }
 
         stage('Run Container') {
+            when {
+                expression { return sh(script: "which docker || true", returnStatus: true) == 0 }
+            }
             steps {
-                sh 'docker rm -f $CONTAINER_NAME || true'
-                sh 'docker run -d -p 3005:3000 --name $CONTAINER_NAME $IMAGE_NAME'
+                sh '''
+                docker stop $APP_NAME || true
+                docker rm $APP_NAME || true
+                docker run -d -p 3000:3000 --name $APP_NAME $APP_NAME
+                '''
             }
         }
+    }
 
-        stage('Deploy') {
-            steps {
-                echo 'App running at http://localhost:3005'
-            }
+    post {
+        success {
+            echo '✅ Build Successful!'
+        }
+        failure {
+            echo '❌ Build Failed!'
         }
     }
 }
