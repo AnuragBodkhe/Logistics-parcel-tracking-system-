@@ -51,13 +51,13 @@ pipeline {
         stage('Run Container') {
             steps {
                 bat "docker rm -f %CONTAINER_NAME% || exit 0"
-                bat "docker run -d -p 3000:3000 --name %CONTAINER_NAME% %IMAGE_NAME%"
+                bat "docker run -d -p 3005:3005 --name %CONTAINER_NAME% %IMAGE_NAME%"
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Application deployed via Docker!'
+                echo 'Application running on http://localhost:3005'
             }
         }
     }
