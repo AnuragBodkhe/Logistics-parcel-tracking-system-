@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS'
-    }
-
     environment {
         IMAGE_NAME = "parcel-tracking-app"
         CONTAINER_NAME = "parcel-container"
@@ -20,6 +16,8 @@ pipeline {
 
         stage('Install') {
             steps {
+                bat 'node -v'
+                bat 'npm -v'
                 bat 'npm install'
             }
         }
@@ -51,13 +49,13 @@ pipeline {
         stage('Run Container') {
             steps {
                 bat "docker rm -f %CONTAINER_NAME% || exit 0"
-                bat "docker run -d -p 3005:3005 --name %CONTAINER_NAME% %IMAGE_NAME%"
+                bat "docker run -d -p 3005:3000 --name %CONTAINER_NAME% %IMAGE_NAME%"
             }
         }
 
         stage('Deploy') {
             steps {
-                echo 'Application running on http://localhost:3005'
+                echo 'Application running at http://localhost:3005'
             }
         }
     }
