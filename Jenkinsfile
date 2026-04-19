@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         APP_NAME = "parcel-tracking-app"
-        PORT = "3000"
+        PORT = "3000"   // external port
     }
 
     stages {
@@ -39,7 +39,7 @@ pipeline {
                 docker stop $APP_NAME || true
                 docker rm $APP_NAME || true
 
-                docker run -d -p $PORT:$PORT \
+                docker run -d -p $PORT:80 \
                 --name $APP_NAME $APP_NAME
                 '''
             }
@@ -48,7 +48,7 @@ pipeline {
 
     post {
         success {
-            echo "✅ App is running on port 3000"
+            echo "✅ App is running on http://localhost:3000"
         }
         failure {
             echo "❌ Build failed"
